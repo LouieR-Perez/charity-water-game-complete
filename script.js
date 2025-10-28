@@ -20,6 +20,12 @@ const replayBtn  = document.getElementById('replayBtn');
 const resetBtn   = document.getElementById('resetBtn');
 const difficultySelect = document.getElementById('difficultySelect'); // new selector for difficulty
 const milestoneMsgEl = document.getElementById('milestoneMsg'); // milestone message container
+// Audio elements (loaded via <audio> tags in HTML)
+// Students: We keep audio simple using built-in <audio>. You place your files inside the /audio folder
+// with the exact names water-drop.mp3 (plus optional .ogg) and wrong-sound.mp3 (plus optional .ogg).
+// We call .play() on each successful or incorrect pump. Setting currentTime=0 lets rapid taps replay.
+const sndPump = document.getElementById('sndPump');     // water drop sound on successful pump
+const sndWrong = document.getElementById('sndWrong');   // error sound when pumping while contaminated
 // confirmResetBtn is added later; safer to grab after DOMContentLoaded
 let confirmResetBtn = null;
 
@@ -263,6 +269,8 @@ function handlePump(){
     // We add the 'shake' class briefly so the player learns they must Purify first.
     pumpBtn.classList.add('shake');
     setTimeout(() => pumpBtn.classList.remove('shake'), 350);
+    // Play wrong sound (rewind to start in case overlapping taps)
+    if (sndWrong){ sndWrong.currentTime = 0; sndWrong.play().catch(()=>{}); }
   // Penalty: lose points for ignoring contamination.
   // setScore() already prevents negative numbers so score will not go below 0.
     setScore(score - PUMP_PENALTY);
@@ -276,6 +284,8 @@ function handlePump(){
   setProgress(progress + PUMP_GAIN);
   setScore(score + 1);
   checkMilestones(); // milestone based on percentage progress
+  // Play success water drop sound
+  if (sndPump){ sndPump.currentTime = 0; sndPump.play().catch(()=>{}); }
 
   // Success feedback: a brief outward glow so players feel progress.
   pumpBtn.classList.add('pump-glow');
