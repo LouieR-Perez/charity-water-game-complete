@@ -19,6 +19,7 @@ const resultMsg  = document.getElementById('resultMsg');
 const replayBtn  = document.getElementById('replayBtn');
 const resetBtn   = document.getElementById('resetBtn');
 const difficultySelect = document.getElementById('difficultySelect'); // new selector for difficulty
+const milestoneMsgEl = document.getElementById('milestoneMsg'); // milestone message container
 // confirmResetBtn is added later; safer to grab after DOMContentLoaded
 let confirmResetBtn = null;
 
@@ -70,6 +71,37 @@ const DIFFICULTIES = {
 let currentDifficultyKey = 'normal'; // track selection for messages
 let dContamMin = DIFFICULTIES.normal.contamMin; // dynamic min delay
 let dContamMax = DIFFICULTIES.normal.contamMax; // dynamic max delay
+
+// Milestone system: messages based on water meter percentage (progress) not score (score varies by difficulty).
+// Each milestone triggers once when progress >= pct.
+const MILESTONES = [
+  { pct: 10,  text: 'Great start! 10% filled.' },
+  { pct: 25,  text: 'Quarter full! 25%.' },
+  { pct: 40,  text: '40% — steady progress!' },
+  { pct: 50,  text: 'Halfway there! 50%.' },
+  { pct: 65,  text: '65% — more than half!' },
+  { pct: 80,  text: '80% — closing in!' },
+  { pct: 90,  text: '90% — final stretch!' }
+];
+let triggeredMilestones = new Set(); // remembers which percentage thresholds have fired
+
+function showMilestone(message){
+  milestoneMsgEl.textContent = message;
+  milestoneMsgEl.classList.remove('hidden');
+  // Auto-hide after 3 seconds
+  setTimeout(() => {
+    milestoneMsgEl.classList.add('hidden');
+  }, 3000);
+}
+
+function checkMilestones(){
+  for (const m of MILESTONES){
+    if (progress >= m.pct && !triggeredMilestones.has(m.pct)){
+      triggeredMilestones.add(m.pct);
+      showMilestone(m.text);
+    }
+  }
+}
 
 function setProgress(next){
   progress = Math.max(0, Math.min(100, next));
@@ -148,6 +180,8 @@ function startGame(){
   setScore(0);
   setProgress(0);
   result.classList.add('hidden');
+  triggeredMilestones.clear(); // reset milestones for new round
+  milestoneMsgEl.classList.add('hidden'); // ensure hidden at start
 
   pumpBtn.disabled = false;
   purifyBtn.disabled = true; // starts clean
@@ -181,7 +215,8 @@ function endGame(won){
   const success = won || progress >= SUCCESS_THRESHOLD;
   const diffLabel = DIFFICULTIES[currentDifficultyKey].label;
   if (success){
-    resultMsg.textContent = `Great job on ${diffLabel} mode! You filled the meter to ${Math.round(progress)}% and scored ${score}.`;
+    // Removed score display per request; focusing on meter completion only.
+    resultMsg.textContent = `Great job on ${diffLabel} mode! You filled the meter to ${Math.round(progress)}%.`;
     launchConfetti(); // celebration effect
   } else {
     resultMsg.textContent = `Time's up on ${diffLabel} mode! You reached ${Math.round(progress)}% with a score of ${score}. Try again!`;
@@ -205,6 +240,8 @@ function resetGame(){
   setProgress(0);
   contaminated = false; // direct flag change; we'll call setContaminated below for UI sync
   setContaminated(false); // ensures badge resets and Purify disabled
+  triggeredMilestones.clear();
+  milestoneMsgEl.classList.add('hidden');
 
   // Disable action buttons until player starts again
   pumpBtn.disabled = true;
@@ -238,6 +275,7 @@ function handlePump(){
   // Pump is allowed: increase progress & score by dynamic gain
   setProgress(progress + PUMP_GAIN);
   setScore(score + 1);
+  checkMilestones(); // milestone based on percentage progress
 
   // Success feedback: a brief outward glow so players feel progress.
   pumpBtn.classList.add('pump-glow');
