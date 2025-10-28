@@ -43,6 +43,13 @@
   <button id="startBtn" class="btn btn-primary">Start</button>
   <!-- Reset button: hidden until game starts -->
   <button id="resetBtn" type="button" class="btn btn-reset ms-1 hidden" data-bs-toggle="modal" data-bs-target="#resetModal">Reset</button>
+  <!-- Difficulty select: player chooses BEFORE starting. Disabled during play. -->
+  <label for="difficultySelect" class="visually-hidden">Difficulty</label>
+  <select id="difficultySelect" class="form-select form-select-sm d-inline-block ms-2" style="width:auto">
+    <option value="easy">Easy</option>
+    <option value="normal" selected>Normal</option>
+    <option value="hard">Hard</option>
+  </select>
       </div>
     </section>
 

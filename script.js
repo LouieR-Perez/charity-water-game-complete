@@ -18,6 +18,7 @@ const result     = document.getElementById('resultPanel');
 const resultMsg  = document.getElementById('resultMsg');
 const replayBtn  = document.getElementById('replayBtn');
 const resetBtn   = document.getElementById('resetBtn');
+const difficultySelect = document.getElementById('difficultySelect'); // new selector for difficulty
 // confirmResetBtn is added later; safer to grab after DOMContentLoaded
 let confirmResetBtn = null;
 
@@ -33,9 +34,42 @@ let contamTimeoutId = null;
 // Settings (tweakable)
 let PUMP_GAIN = 4;                    // % gained per pump tap (will be recalculated each game)
 const SUCCESS_THRESHOLD = 100;        // always fill meter to 100%
-const CONTAM_MIN_DELAY_MS = 900;      // earliest next contamination
-const CONTAM_MAX_DELAY_MS = 2500;     // latest next contamination
+// These original contamination delay values now live inside the Normal difficulty below.
+// We keep constants here only if needed for fallback.
+const CONTAM_MIN_DELAY_MS = 900;      // baseline earliest next contamination (Normal)
+const CONTAM_MAX_DELAY_MS = 2500;     // baseline latest next contamination (Normal)
 const PUMP_PENALTY = 1;               // points lost if player pumps while contaminated (obstacle)
+
+// Difficulty settings
+// We adjust ONLY time limit and contamination frequency (how soon/ often water becomes dirty).
+// Students: Lower delay numbers = more frequent contamination.
+// Easy: more time, contamination less frequent (larger delay range)
+// Normal: current baseline
+// Hard: less time, contamination more frequent (smaller delay range)
+const DIFFICULTIES = {
+  easy: {
+    label: 'Easy',
+    time: 50,            // +5 seconds vs Normal
+    contamMin: 1200,     // contamination happens later
+    contamMax: 3200
+  },
+  normal: {
+    label: 'Normal',
+    time: 45,
+    contamMin: 900,
+    contamMax: 2500
+  },
+  hard: {
+    label: 'Hard',
+    time: 40,            // -5 seconds vs Normal
+    contamMin: 650,      // sooner & more often
+    contamMax: 1800
+  }
+};
+
+let currentDifficultyKey = 'normal'; // track selection for messages
+let dContamMin = DIFFICULTIES.normal.contamMin; // dynamic min delay
+let dContamMax = DIFFICULTIES.normal.contamMax; // dynamic max delay
 
 function setProgress(next){
   progress = Math.max(0, Math.min(100, next));
@@ -76,8 +110,8 @@ function scheduleNextContamination(){
   // Clear any pending timer
   if (contamTimeoutId) clearTimeout(contamTimeoutId);
   if (!active) return;
-
-  const delay = randInt(CONTAM_MIN_DELAY_MS, CONTAM_MAX_DELAY_MS);
+  // Use difficulty-based dynamic delay values (smaller range = more frequent contamination)
+  const delay = randInt(dContamMin, dContamMax);
   contamTimeoutId = setTimeout(() => {
     // Trigger contamination only if still active and currently clean
     if (active && !contaminated) setContaminated(true);
@@ -89,6 +123,15 @@ function randInt(min, max){
 }
 
 function startGame(){
+  // Difficulty: read selection BEFORE initializing values
+  currentDifficultyKey = difficultySelect.value || 'normal';
+  const diff = DIFFICULTIES[currentDifficultyKey];
+  // Apply time and contamination delay ranges for this round
+  setTime(diff.time);
+  dContamMin = diff.contamMin;
+  dContamMax = diff.contamMax;
+  difficultySelect.disabled = true; // lock difficulty during active play
+
   // Randomize the number of clicks needed to win (between 25 and 35)
   // Instead of raising the threshold above 100%, we adjust how much each click adds.
   // This keeps the visual meter consistent (0–100%) and still varies difficulty.
@@ -103,7 +146,6 @@ function startGame(){
   // Reset state
   active = true;
   setScore(0);
-  setTime(45);
   setProgress(0);
   result.classList.add('hidden');
 
@@ -134,13 +176,15 @@ function endGame(won){
   purifyBtn.disabled = true;
   startBtn.disabled = false;
   resetBtn.classList.add('hidden'); // hide reset after game ends
+  difficultySelect.disabled = false; // allow changing for next round
 
   const success = won || progress >= SUCCESS_THRESHOLD;
+  const diffLabel = DIFFICULTIES[currentDifficultyKey].label;
   if (success){
-    resultMsg.textContent = `Great job! You filled the meter to ${Math.round(progress)}% and scored ${score}.`;
+    resultMsg.textContent = `Great job on ${diffLabel} mode! You filled the meter to ${Math.round(progress)}% and scored ${score}.`;
     launchConfetti(); // celebration effect
   } else {
-    resultMsg.textContent = `Time's up! You reached ${Math.round(progress)}% with a score of ${score}. Try again!`;
+    resultMsg.textContent = `Time's up on ${diffLabel} mode! You reached ${Math.round(progress)}% with a score of ${score}. Try again!`;
   }
   result.classList.remove('hidden');
 }
@@ -155,7 +199,9 @@ function resetGame(){
 
   // Clear state values
   setScore(0);
-  setTime(45);
+  // Reset time to currently selected difficulty (player can pick a new one before starting)
+  const diff = DIFFICULTIES[difficultySelect.value || 'normal'];
+  setTime(diff.time);
   setProgress(0);
   contaminated = false; // direct flag change; we'll call setContaminated below for UI sync
   setContaminated(false); // ensures badge resets and Purify disabled
@@ -165,6 +211,7 @@ function resetGame(){
   purifyBtn.disabled = true;
   startBtn.disabled = false;
   resetBtn.classList.add('hidden'); // hide until a new game starts
+  difficultySelect.disabled = false; // re-enable difficulty selection
 
   // Hide any result panel if visible
   result.classList.add('hidden');
