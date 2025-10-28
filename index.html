@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Pump it Pure — Core Prototype</title>
+  <!-- Bootstrap 5 CSS for responsive layout -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+  <!-- Our custom styles come after Bootstrap so we can override if needed -->
+  <link rel="stylesheet" href="styles.css"/>
+  <!--
+    NOTE FOR STUDENTS:
+    We added Bootstrap (a popular CSS framework) to make the layout adapt automatically on small screens.
+    Key Bootstrap classes we use:
+      container -> centers and adds side padding (we kept our own wrapper .game-container for custom sizing)
+      row       -> a horizontal group of columns
+      col / col-auto / col-12 / col-sm-auto -> columns that resize at different breakpoints
+      g-2       -> a small gap (gutter) between columns
+      w-100     -> make an element take full width on tiny screens
+    You can remove Bootstrap later and keep only CSS if you want a pure vanilla approach.
+  -->
+</head>
+<body>
+  <header class="site-header">
+    <div class="brand-mark" aria-hidden="true">💧</div>
+    <h1>Pump it Pure</h1>
+  </header>
+
+  <!-- We use a Bootstrap container to get built-in responsive padding -->
+  <main class="container game-container">
+    <!-- HUD -->
+    <!-- Row: HUD (time, score, start button). On small screens items wrap nicely. -->
+    <section class="hud row g-2" role="status" aria-live="polite">
+      <div class="col-auto hud-item">
+        <span class="label">Time</span>
+        <span id="time" class="value">45</span>
+      </div>
+      <div class="col-auto hud-item">
+        <span class="label">Score</span>
+        <span id="score" class="value">0</span>
+      </div>
+      <div class="col-auto">
+  <button id="startBtn" class="btn btn-primary">Start</button>
+  <!-- Reset button: hidden until game starts -->
+  <button id="resetBtn" type="button" class="btn btn-reset ms-1 hidden" data-bs-toggle="modal" data-bs-target="#resetModal">Reset</button>
+      </div>
+    </section>
+
+    <!-- Water meter -->
+    <!-- Row: Water meter. We use Bootstrap's grid so percentage can sit beside the bar. -->
+    <section class="meter-wrap row align-items-center" aria-label="Water meter">
+      <div class="col meter">
+        <div id="meterFill" class="meter-fill" style="width:0%"></div>
+      </div>
+      <div class="col-auto meter-pct" id="meterPct" aria-hidden="true">0%</div>
+    </section>
+
+    <!-- Controls -->
+    <!-- Row: Controls. On small screens each button can take full width. -->
+    <section class="controls row g-2">
+      <div class="col-12 col-sm-auto">
+        <button id="pumpBtn" class="btn btn-pump w-100" disabled>Pump</button>
+      </div>
+      <div class="col-12 col-sm-auto">
+        <button id="purifyBtn" class="btn btn-purify w-100" disabled>Purify</button>
+      </div>
+      <div class="col-12 col-sm-auto">
+        <span id="statusBadge" class="status safe w-100 d-inline-block text-center">Water: Clean</span>
+      </div>
+    </section>
+
+    <!-- Result / Replay -->
+    <!-- Row: Result panel appears after game ends -->
+    <section id="resultPanel" class="result row hidden" aria-live="polite">
+      <div class="col-12 col-sm">
+        <p id="resultMsg" class="mb-2 mb-sm-0"></p>
+      </div>
+      <div class="col-12 col-sm-auto text-sm-end">
+        <button id="replayBtn" class="btn w-100 w-sm-auto">Replay</button>
+      </div>
+    </section>
+
+    <footer class="site-footer">
+      <small>
+        Inspired by <a href="https://www.charitywater.org/" target="_blank" rel="noopener noreferrer">charity: water</a>
+      </small>
+      <div class="footer-logo">
+        <img src="img/cw_logo.png" alt="charity: water logo" />
+      </div>
+    </footer>
+  </main>
+
+  <!-- Reset Confirmation Modal (placed BEFORE scripts so elements exist when JS runs) -->
+  <div class="modal fade" id="resetModal" tabindex="-1" aria-labelledby="resetModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="resetModalLabel">Confirm Reset</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          Resetting will stop the current game and clear your progress. Are you sure you want to reset?
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="button" id="confirmResetBtn" class="btn btn-danger" data-bs-dismiss="modal">Yes, Reset</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- Bootstrap JS Bundle then our custom script -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+  <script src="script.js"></script>
+</body>
+</html>

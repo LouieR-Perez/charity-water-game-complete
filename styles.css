@@ -1,0 +1,313 @@
+/*
+  Pump it Pure Styles
+  --------------------
+  We are using Bootstrap 5 for responsive grid/layout helpers.
+  Our custom styles live here and intentionally avoid overriding Bootstrap defaults unless needed.
+  We renamed our original .container to .game-container so it does not fight Bootstrap's own .container class.
+  Media queries: We match Bootstrap's sm breakpoint (576px) to stack buttons full-width on very small screens.
+*/
+/* Charity: water brand-inspired palette */
+:root{
+  --cw-yellow:#FFC907;
+  --cw-blue:#2E9DF7;
+  --cw-green:#4FCB53;
+  --cw-red:#F5402C;
+  --ink:#111;
+  --bg:#fffef7;
+  --panel:#ffffff;
+  --muted:#eef6ff;
+  --shadow:0 6px 20px rgba(0,0,0,.12);
+}
+
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body{
+  margin:0;
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  color:var(--ink);
+  background:var(--bg);
+}
+
+.site-header{
+  display:flex;
+  align-items:center;
+  justify-content:center; /* Center the brand mark and title horizontally */
+  gap:.6rem;
+  padding:1rem 1.25rem;
+  background:var(--cw-yellow);
+  color:#1a1a1a;
+  box-shadow:var(--shadow);
+  text-align:center; /* Ensure text itself centers if it wraps */
+}
+.site-header .brand-mark{ font-size:1.4rem; }
+.site-header h1{
+  margin:0;
+  font-size:1.25rem;
+  letter-spacing:.2px;
+}
+
+.game-container{ /* Our custom wrapper. We renamed from .container to avoid clashing with Bootstrap's .container */
+  max-width:900px;
+  margin:1rem auto;
+  padding:0 1rem 2rem;
+}
+
+.hud{
+  /* We keep flex so internal spacing remains nice even with Bootstrap grid */
+  display:flex;
+  flex-wrap:wrap;
+  align-items:center;
+  justify-content:center; /* Center time, score, start/reset buttons */
+  gap:1rem;
+  background:var(--panel);
+  border:1px solid #eee;
+  border-radius:14px;
+  padding:.75rem 1rem;
+  box-shadow:var(--shadow);
+}
+.hud-item{
+  display:flex;
+  gap:.35rem;
+  align-items:baseline;
+  padding:.35rem .6rem;
+  background:var(--muted);
+  border-radius:10px;
+}
+.label{ font-size:.8rem; opacity:.7; }
+.value{ font-weight:700; min-width:2ch; text-align:right; }
+
+.btn{
+  border:none;
+  padding:.65rem 1rem;
+  border-radius:999px;
+  cursor:pointer;
+  font-weight:700;
+  background:#f2f2f2;
+  transition:transform .06s ease, filter .2s ease, box-shadow .2s ease;
+}
+.btn:disabled{
+  opacity:.6;
+  cursor:not-allowed;
+}
+.btn:active{ transform:translateY(1px) scale(.98); }
+.btn-primary{ background:var(--cw-blue); color:white; }
+.btn-pump{ background:#fff; border:2px solid var(--cw-blue); }
+.btn-purify{ background:#fff; border:2px solid var(--cw-green); }
+.btn-pump:hover:not(:disabled){
+  background:rgba(46,157,247,0.08); /* light blue tint */
+  border-color:var(--cw-blue); /* keep border visible */
+  box-shadow:0 0 0 3px rgba(46,157,247,.25);
+}
+.btn-purify:hover:not(:disabled){
+  background:rgba(79,203,83,0.10); /* light green tint */
+  border-color:var(--cw-green);
+  box-shadow:0 0 0 3px rgba(79,203,83,.25);
+}
+/* Accessible keyboard focus */
+.btn-pump:focus-visible,
+.btn-purify:focus-visible{
+  outline:3px solid #111; /* high contrast outline */
+  outline-offset:2px;
+}
+/* Success glow feedback classes added via JS then removed after a short timeout */
+.pump-glow{
+  animation:pumpGlow .5s ease;
+}
+@keyframes pumpGlow{
+  0%{ box-shadow:0 0 0 0 rgba(46,157,247,.6); }
+  60%{ box-shadow:0 0 0 10px rgba(46,157,247,0); }
+  100%{ box-shadow:none; }
+}
+.purify-glow{
+  animation:purifyGlow .5s ease;
+}
+/* Reset button (danger action) */
+.btn-reset{
+  background:var(--cw-red);
+  color:#fff;
+  font-weight:700;
+  border:none;
+}
+.btn-reset:hover:not(:disabled){
+  filter:brightness(1.1);
+}
+.btn-reset:active{ transform:translateY(1px) scale(.98); }
+@keyframes purifyGlow{
+  0%{ box-shadow:0 0 0 0 rgba(79,203,83,.6); }
+  60%{ box-shadow:0 0 0 10px rgba(79,203,83,0); }
+  100%{ box-shadow:none; }
+}
+
+/* Meter */
+.meter-wrap{
+  margin:1rem 0 0.5rem;
+  display:flex;
+  align-items:center;
+  gap:.75rem;
+}
+.meter{
+  flex:1;
+  height:22px;
+  background:#dbeefe; /* slightly bluer for seamless ends */
+  border-radius:999px;
+  overflow:hidden;
+  position:relative;
+  /* Remove border to avoid inner gaps; use subtle inset shadow instead */
+  box-shadow:inset 0 0 0 1px rgba(0,0,0,.06), inset 0 1px 3px rgba(0,0,0,.08);
+}
+.meter-fill{
+  position:absolute;
+  left:0;
+  top:0;
+  height:100%;
+  width:0%;
+  background:linear-gradient(90deg, var(--cw-blue) 0%, #79c6ff 100%);
+  transition:width .15s ease;
+}
+/* Optional full state if we want to highlight completion later */
+.meter-full .meter-fill{
+  filter:brightness(1.05);
+}
+.meter-pct{
+  min-width:3ch;
+  text-align:right;
+  font-weight:800;
+}
+
+.controls{
+  display:flex; /* Works with Bootstrap row columns */
+  flex-wrap:wrap;
+  align-items:center;
+  justify-content:center; /* Center Pump, Purify, and status badge */
+  gap:.75rem;
+  margin:.5rem 0 0;
+}
+
+.status{
+  padding:.4rem .65rem;
+  border-radius:999px;
+  font-weight:700;
+  border:1px solid #eaeaea;
+}
+.status.safe{
+  background:#eaffea;
+  border-color:#b6e8b6;
+  color:#116e11;
+}
+.status.contaminated{
+  background:#ffe9e7;
+  border-color:#ffd0cb;
+  color:#8f1309;
+}
+
+/* Feedback */
+.shake{
+  animation:shake .35s ease;
+}
+@keyframes shake{
+  10%, 90% { transform:translateX(-1px); }
+  20%, 80% { transform:translateX(2px); }
+  30%, 50%, 70% { transform:translateX(-4px); }
+  40%, 60% { transform:translateX(4px); }
+}
+
+/* Contaminated visual on Pump button */
+.pump-blocked{
+  box-shadow:0 0 0 3px rgba(245,64,44,.25);
+  border-color:var(--cw-red) !important;
+}
+
+/* Result */
+.result{
+  margin-top:1rem;
+  background:var(--panel);
+  border:1px solid #eee;
+  border-radius:14px;
+  padding:1rem;
+  box-shadow:var(--shadow);
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:.75rem;
+}
+.hidden{ display:none; }
+
+.site-footer{
+  margin-top:1rem;
+  padding:1rem;
+  text-align:center;
+  color:#444;
+}
+.site-footer a{
+  color:#0f6bd6;
+  text-decoration:none;
+}
+
+/* Footer logo now displayed below attribution */
+.footer-logo{
+  margin-top:.35rem;
+  display:flex;
+  justify-content:center;
+}
+.footer-logo img{
+  height:42px;
+  width:auto;
+  filter:drop-shadow(0 1px 2px rgba(0,0,0,.25));
+}
+
+/* Responsive tweaks */
+@media (max-width:576px){ /* Bootstrap's sm breakpoint */
+  .controls .btn{ width:100%; }
+  #statusBadge{ width:100%; }
+  .result{ flex-direction:column; align-items:stretch; }
+}
+
+/* Confetti celebration (vanilla, no canvas) */
+.confetti-container{
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  overflow:hidden;
+  z-index:999;
+}
+.confetti{
+  position:absolute;
+  width:10px;
+  height:14px;
+  background:var(--cw-blue);
+  top:-20px;
+  opacity:0.9;
+  transform:rotate(0deg);
+  animation:fall linear forwards;
+}
+@keyframes fall{
+  to{
+    transform:translateY(110vh) rotate(720deg);
+    opacity:0.85;
+  }
+}
+/* Color modifiers */
+.c-yellow{ background:var(--cw-yellow); }
+.c-green{ background:var(--cw-green); }
+.c-red{ background:var(--cw-red); }
+
+/* Modal buttons: restore clearer contrast (our global .btn style was overriding Bootstrap defaults) */
+.modal .btn{
+  border-radius:.55rem; /* slightly rounded but not full pill */
+  font-weight:600;
+  background:inherit; /* allow specific classes below to set color */
+}
+.modal .btn.btn-secondary{
+  background:#e5e7ea;
+  color:#222;
+}
+.modal .btn.btn-secondary:hover{
+  background:#d6d9dc;
+}
+.modal .btn.btn-danger{
+  background:var(--cw-red);
+  color:#fff;
+}
+.modal .btn.btn-danger:hover{
+  filter:brightness(1.1);
+}
