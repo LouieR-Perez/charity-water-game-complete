@@ -21,6 +21,15 @@
   -->
 </head>
 <body>
+  <!-- Decorative background scene (pure CSS). aria-hidden so assistive tech ignores it. -->
+  <div class="scene" aria-hidden="true">
+    <div class="sky">
+      <div class="sun"></div>
+      <!-- Optional clouds could be added later -->
+    </div>
+    <div class="grass-layer grass-back"></div>
+    <div class="grass-layer grass-front"></div>
+  </div>
   <header class="site-header">
     <div class="brand-mark" aria-hidden="true">💧</div>
     <h1>Pump it Pure</h1>
@@ -91,15 +100,16 @@
          aria-live="polite" lets screen readers announce updates without interrupting. -->
     <div id="milestoneMsg" class="milestone hidden" aria-live="polite"></div>
 
-    <footer class="site-footer">
-      <small>
-        Inspired by <a href="https://www.charitywater.org/" target="_blank" rel="noopener noreferrer">charity: water</a>
-      </small>
-      <div class="footer-logo">
-        <img src="img/cw_logo.png" alt="charity: water logo" />
-      </div>
-    </footer>
   </main>
+
+  <footer class="site-footer">
+    <small>
+      Inspired by <a href="https://www.charitywater.org/" target="_blank" rel="noopener noreferrer">charity: water</a>
+    </small>
+    <div class="footer-logo">
+      <img src="img/cw_logo.png" alt="charity: water logo" />
+    </div>
+  </footer>
 
   <!-- Reset Confirmation Modal (placed BEFORE scripts so elements exist when JS runs) -->
   <div class="modal fade" id="resetModal" tabindex="-1" aria-labelledby="resetModalLabel" aria-hidden="true">

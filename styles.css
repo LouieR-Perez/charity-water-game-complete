@@ -35,6 +35,65 @@ body{
   background:var(--bg);
 }
 
+/* Scenic background -------------------------------------------------------
+   We build a simple landscape using layered divs (no external images):
+   - .sky: gradient from light blue to slightly deeper blue
+   - .sun: circular yellow with subtle glow and slow rotation for life
+   - .grass layers: two overlapping green strips with different shades
+   These are positioned fixed so gameplay UI scroll (if any) stays independent.
+*/
+.scene{
+  position:fixed;
+  inset:0;
+  z-index:-2; /* behind everything */
+  overflow:hidden;
+}
+.sky{
+  position:absolute;
+  inset:0;
+  background:linear-gradient(#a7d9ff 0%, #6ec1ff 60%, #5ab4ff 100%);
+}
+.sun{
+  position:absolute;
+  top:8vh;
+  right:10vw;
+  width:120px;
+  height:120px;
+  background:radial-gradient(circle at 35% 35%, #fff8c7 0%, #ffe066 40%, #ffc907 70%, #f5b300 100%);
+  border-radius:50%;
+  box-shadow:0 0 30px rgba(255,200,64,.6), 0 0 80px rgba(255,200,64,.35);
+  animation:sunSpin 40s linear infinite;
+}
+@keyframes sunSpin{
+  to{ transform:rotate(360deg); }
+}
+.grass-layer{
+  position:absolute;
+  left:0;
+  width:100%;
+  border-top-left-radius:65% 20%;
+  border-top-right-radius:65% 20%;
+}
+.grass-back{
+  bottom:0;
+  height:22vh;
+  background:linear-gradient(#3fae3f 0%, #2f8a2f 100%);
+  filter:brightness(.95);
+}
+.grass-front{
+  bottom:0;
+  height:14vh;
+  background:linear-gradient(#56c756 0%, #3da63d 100%);
+  box-shadow:0 -6px 14px rgba(0,0,0,.15) inset;
+  z-index:1;
+}
+
+/* Ensure main UI sits above scene */
+.game-container, .site-header, .site-footer, .hud, .controls, .meter-wrap, .result, .milestone{
+  position:relative;
+  z-index:5;
+}
+
 .site-header{
   display:flex;
   align-items:center;
@@ -53,10 +112,23 @@ body{
   letter-spacing:.2px;
 }
 
+/* Layout: use flex column so footer sticks to bottom even with little content */
+body{
+  display:flex;
+  flex-direction:column;
+  min-height:100vh;
+}
+
 .game-container{ /* Our custom wrapper. We renamed from .container to avoid clashing with Bootstrap's .container */
+  flex:1 0 auto; /* allow to grow, keeps footer at bottom */
   max-width:900px;
+  width:100%;
   margin:1rem auto;
   padding:0 1rem 2rem;
+}
+
+.site-footer{
+  flex-shrink:0; /* prevent footer from shrinking */
 }
 
 .hud{
@@ -259,10 +331,11 @@ body{
 }
 
 .site-footer{
-  margin-top:1rem;
   padding:1rem;
   text-align:center;
   color:#444;
+  background:rgba(255,255,255,0.65);
+  backdrop-filter:blur(3px);
 }
 .site-footer a{
   color:#0f6bd6;
